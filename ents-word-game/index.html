@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ents Are Going to Isengard!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Gaegu:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bark: #4a3728;
+    --bark-light: #6b5344;
+    --leaf-dark: #1a3a1a;
+    --leaf: #2d5a27;
+    --leaf-light: #4a8c3f;
+    --moss: #6b8f3c;
+    --gold: #d4a843;
+    --gold-light: #f0d68a;
+    --sky: #1a2e1a;
+    --parchment: #f5e6c8;
+    --parchment-dark: #d4c4a0;
+    --ember: #c44d2b;
+    --smoke: #555;
+  }
+
+  body {
+    font-family: 'MedievalSharp', cursive;
+    background: var(--sky);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  /* ── FOREST BACKGROUND ── */
+  .forest-bg {
+    position: fixed; inset: 0;
+    background: linear-gradient(
+      180deg,
+      #0d1f0d 0%, #1a3a1a 30%, #1e4420 50%, #2a3a1a 70%, #1a2a10 100%
+    );
+    z-index: 0;
+  }
+
+  .forest-bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 100%, rgba(20,40,10,0.9) 0%, transparent 70%),
+      radial-gradient(circle at 20% 30%, rgba(50,90,30,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 80% 20%, rgba(40,80,25,0.1) 0%, transparent 35%);
+  }
+
+  /* Firefly particles */
+  .fireflies {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  }
+  .firefly {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: var(--gold-light);
+    border-radius: 50%;
+    box-shadow: 0 0 8px 3px rgba(240,214,138,0.4);
+    animation: drift 8s ease-in-out infinite, flicker 2s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(30px, -20px); }
+    50% { transform: translate(-20px, -40px); }
+    75% { transform: translate(15px, -10px); }
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.9; }
+  }
+
+  /* ── TREE SILHOUETTES ── */
+  .trees {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 45vh;
+    z-index: 2; pointer-events: none;
+  }
+  .tree-silhouette {
+    position: absolute; bottom: 0;
+    font-size: 0;
+    opacity: 0.25;
+  }
+  .tree-silhouette svg { display: block; }
+
+  /* ── GROUND ── */
+  .ground {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 110px;
+    background: linear-gradient(180deg, #1a2a10 0%, #141e0a 100%);
+    z-index: 3;
+    border-top: 3px solid rgba(107,143,60,0.3);
+  }
+
+  /* ── MARCH PROGRESS (the path to Isengard) ── */
+  .march-container {
+    position: fixed; bottom: 10px; left: 0; right: 0;
+    z-index: 10; padding: 0 20px;
+  }
+  .march-path {
+    position: relative; height: 80px; width: 100%;
+  }
+  .path-line {
+    position: absolute; bottom: 18px; left: 40px; right: 40px;
+    height: 4px;
+    background: rgba(107,143,60,0.3);
+    border-radius: 2px;
+  }
+  .path-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--moss), var(--gold));
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .fangorn-label, .isengard-label {
+    position: absolute; bottom: 28px;
+    font-size: 11px; color: var(--moss);
+    letter-spacing: 1px; text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .fangorn-label { left: 10px; }
+  .isengard-label { right: 6px; }
+
+  .ent-walker {
+    position: absolute; bottom: 20px;
+    font-size: 36px;
+    transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 6px rgba(107,143,60,0.5));
+    animation: entWalk 1.2s ease-in-out infinite;
+    z-index: 11;
+  }
+  @keyframes entWalk {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-4px) rotate(2deg); }
+  }
+
+  /* Small ent followers */
+  .ent-follower {
+    position: absolute; bottom: 22px;
+    font-size: 22px;
+    transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: entWalk 1.4s ease-in-out infinite;
+    opacity: 0;
+    z-index: 11;
+  }
+  .ent-follower.visible { opacity: 1; }
+
+  /* Isengard tower */
+  .isengard-icon {
+    position: absolute; bottom: 18px; right: 18px;
+    font-size: 28px;
+    animation: towerPulse 3s ease-in-out infinite;
+  }
+  @keyframes towerPulse {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(196,77,43,0.3)); }
+    50% { filter: drop-shadow(0 0 10px rgba(196,77,43,0.6)); }
+  }
+
+  /* ── MAIN GAME AREA ── */
+  .game-area {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 5;
+    padding-bottom: 100px;
+  }
+
+  /* Score & streak */
+  .hud {
+    position: fixed; top: 20px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 30px;
+    z-index: 15;
+  }
+  .hud-item {
+    background: rgba(26,42,16,0.85);
+    border: 1px solid rgba(107,143,60,0.3);
+    border-radius: 12px;
+    padding: 8px 18px;
+    color: var(--parchment);
+    font-size: 15px;
+    backdrop-filter: blur(6px);
+  }
+  .hud-item span { color: var(--gold); font-size: 18px; }
+
+  /* Title */
+  .game-title {
+    color: var(--gold);
+    font-size: clamp(18px, 4vw, 28px);
+    text-shadow: 0 2px 12px rgba(212,168,67,0.3);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    opacity: 0.85;
+  }
+
+  /* The word to read */
+  .word-display {
+    position: relative;
+    margin: 20px 0 30px;
+  }
+  .word-display .word {
+    font-family: 'Gaegu', cursive;
+    font-weight: 700;
+    font-size: clamp(56px, 12vw, 100px);
+    color: var(--parchment);
+    text-shadow:
+      0 0 30px rgba(245,230,200,0.2),
+      0 4px 0 var(--bark);
+    letter-spacing: 4px;
+    animation: wordAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes wordAppear {
+    0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  /* Prompt text */
+  .prompt {
+    color: var(--moss);
+    font-size: 16px;
+    margin-bottom: 8px;
+    opacity: 0.8;
+    letter-spacing: 1px;
+  }
+
+  /* Emoji choices */
+  .choices {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    justify-content: center;
+    max-width: 500px;
+  }
+  .choice-btn {
+    width: 88px; height: 88px;
+    font-size: 44px;
+    background: rgba(26,42,16,0.7);
+    border: 2px solid rgba(107,143,60,0.3);
+    border-radius: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    animation: choiceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  .choice-btn:hover {
+    transform: scale(1.12);
+    border-color: var(--gold);
+    background: rgba(107,143,60,0.25);
+    box-shadow: 0 0 20px rgba(212,168,67,0.2);
+  }
+  .choice-btn:active { transform: scale(0.95); }
+  @keyframes choiceIn {
+    0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  }
+
+  /* Correct / wrong feedback */
+  .choice-btn.correct {
+    border-color: var(--moss) !important;
+    background: rgba(45,90,39,0.5) !important;
+    box-shadow: 0 0 25px rgba(74,140,63,0.4);
+    animation: correctPop 0.5s ease;
+  }
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1.1); }
+  }
+  .choice-btn.wrong {
+    border-color: var(--ember) !important;
+    background: rgba(196,77,43,0.2) !important;
+    animation: wrongShake 0.4s ease;
+  }
+  @keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* Ent speech bubble */
+  .ent-speech {
+    position: fixed;
+    bottom: 96px; left: 50%; transform: translateX(-50%);
+    background: rgba(26,42,16,0.9);
+    border: 1px solid rgba(107,143,60,0.4);
+    border-radius: 14px;
+    padding: 8px 18px;
+    color: var(--parchment);
+    font-size: 15px;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .ent-speech.show { opacity: 1; }
+
+  /* ── VICTORY SCREEN ── */
+  .victory-overlay {
+    position: fixed; inset: 0;
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10,20,8,0.92);
+    backdrop-filter: blur(8px);
+  }
+  .victory-overlay.show { display: flex; }
+  .victory-title {
+    font-size: clamp(32px, 8vw, 60px);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(212,168,67,0.5);
+    margin-bottom: 10px;
+    animation: victoryBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes victoryBounce {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .victory-sub {
+    color: var(--parchment);
+    font-size: 20px;
+    margin-bottom: 6px;
+    opacity: 0.8;
+  }
+  .victory-ents {
+    font-size: 50px;
+    letter-spacing: 8px;
+    margin: 16px 0;
+    animation: entParade 2s linear infinite;
+  }
+  @keyframes entParade {
+    0% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(-10px); }
+  }
+  .play-again-btn {
+    margin-top: 24px;
+    font-family: 'MedievalSharp', cursive;
+    font-size: 20px;
+    background: var(--leaf);
+    color: var(--parchment);
+    border: 2px solid var(--moss);
+    border-radius: 14px;
+    padding: 14px 36px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .play-again-btn:hover {
+    background: var(--leaf-light);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(107,143,60,0.3);
+  }
+
+  /* ── START SCREEN ── */
+  .start-overlay {
+    position: fixed; inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10,20,8,0.92);
+    backdrop-filter: blur(8px);
+    text-align: center;
+  }
+  .start-overlay.hide { display: none; }
+  .start-title {
+    font-size: clamp(28px, 7vw, 50px);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(212,168,67,0.5);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .start-sub {
+    color: var(--parchment);
+    font-size: 17px;
+    opacity: 0.75;
+    max-width: 340px;
+    line-height: 1.5;
+    margin: 12px 0 6px;
+  }
+  .start-ents {
+    font-size: 56px;
+    letter-spacing: 10px;
+    margin: 16px 0;
+  }
+  .start-btn {
+    font-family: 'MedievalSharp', cursive;
+    font-size: 22px;
+    background: var(--leaf);
+    color: var(--parchment);
+    border: 2px solid var(--moss);
+    border-radius: 14px;
+    padding: 16px 44px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 2px;
+    margin-top: 10px;
+  }
+  .start-btn:hover {
+    background: var(--leaf-light);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(107,143,60,0.3);
+  }
+</style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="forest-bg"></div>
+<div class="fireflies" id="fireflies"></div>
+<div class="ground"></div>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="hud-item">🌿 Score: <span id="score">0</span></div>
+  <div class="hud-item">🔥 Streak: <span id="streak">0</span></div>
+</div>
+
+<!-- Game area -->
+<div class="game-area">
+  <div class="game-title">🌲 Fangorn Forest 🌲</div>
+  <div class="prompt">What does this word mean?</div>
+  <div class="word-display">
+    <div class="word" id="word">cat</div>
+  </div>
+  <div class="choices" id="choices"></div>
+</div>
+
+<!-- Ent speech -->
+<div class="ent-speech" id="speech"></div>
+
+<!-- March progress -->
+<div class="march-container">
+  <div class="march-path">
+    <span class="fangorn-label">Fangorn</span>
+    <span class="isengard-label">Isengard</span>
+    <div class="path-line"><div class="path-fill" id="pathFill"></div></div>
+    <div class="ent-walker" id="entWalker">🌳</div>
+    <div class="ent-follower" id="follower1">🌲</div>
+    <div class="ent-follower" id="follower2">🌿</div>
+    <div class="ent-follower" id="follower3">🍃</div>
+    <div class="isengard-icon">🏰</div>
+  </div>
+</div>
+
+<!-- Start screen -->
+<div class="start-overlay" id="startScreen">
+  <div class="start-title">The Ents Are Going<br>to Isengard!</div>
+  <div class="start-ents">🌳🌲🌿🍃</div>
+  <div class="start-sub">Read the word, then pick the right emoji. Help the Ents march all the way to Isengard!</div>
+  <button class="start-btn" onclick="startGame()">Begin the March</button>
+</div>
+
+<!-- Victory screen -->
+<div class="victory-overlay" id="victoryScreen">
+  <div class="victory-title">Isengard Has Fallen!</div>
+  <div class="victory-sub">The Ents have broken the dam!</div>
+  <div class="victory-ents">🌳🌊🌊🏰💥</div>
+  <div class="victory-sub" id="finalScore">You got 10 right!</div>
+  <button class="play-again-btn" onclick="restartGame()">March Again</button>
+</div>
+
+<script>
+// ── WORD / EMOJI DATA ──
+const wordBank = [
+  { word: "cat",     correct: "🐱", pool: ["🐶","🐱","🐟","🌸"] },
+  { word: "dog",     correct: "🐶", pool: ["🐱","🐶","🐸","🍎"] },
+  { word: "sun",     correct: "☀️", pool: ["🌙","☀️","⭐","🌧️"] },
+  { word: "moon",    correct: "🌙", pool: ["☀️","🌙","💧","🔥"] },
+  { word: "star",    correct: "⭐", pool: ["🌙","☀️","⭐","🌈"] },
+  { word: "fish",    correct: "🐟", pool: ["🐟","🐦","🐛","🐱"] },
+  { word: "bird",    correct: "🐦", pool: ["🐟","🐦","🐸","🦋"] },
+  { word: "tree",    correct: "🌳", pool: ["🌸","🌳","🍄","🔥"] },
+  { word: "flower",  correct: "🌸", pool: ["🌳","🌸","🍎","⭐"] },
+  { word: "apple",   correct: "🍎", pool: ["🍎","🍌","🌸","🐛"] },
+  { word: "fire",    correct: "🔥", pool: ["💧","🔥","❄️","☀️"] },
+  { word: "water",   correct: "💧", pool: ["🔥","💧","🌙","🍎"] },
+  { word: "frog",    correct: "🐸", pool: ["🐸","🐟","🐱","🐶"] },
+  { word: "bug",     correct: "🐛", pool: ["🐛","🐦","🐟","🌸"] },
+  { word: "house",   correct: "🏠", pool: ["🏠","🚗","📖","🎵"] },
+  { word: "car",     correct: "🚗", pool: ["🏠","🚗","🐶","⭐"] },
+  { word: "book",    correct: "📖", pool: ["📖","🎵","🏠","💧"] },
+  { word: "rain",    correct: "🌧️", pool: ["☀️","🌧️","❄️","🌈"] },
+  { word: "snow",    correct: "❄️", pool: ["🌧️","🔥","❄️","☀️"] },
+  { word: "heart",   correct: "❤️", pool: ["❤️","⭐","🌙","🍎"] },
+  { word: "banana",  correct: "🍌", pool: ["🍎","🍌","🌸","🐸"] },
+  { word: "rainbow", correct: "🌈", pool: ["🌈","🌧️","☀️","🌙"] },
+  { word: "cake",    correct: "🎂", pool: ["🎂","🍎","🏠","📖"] },
+  { word: "music",   correct: "🎵", pool: ["📖","🎵","🏠","🌈"] },
+];
+
+const entPhrases = [
+  "Hoom, well done, little one!",
+  "Burarum! That is correct!",
+  "A hasty answer — and a right one!",
+  "The forest approves!",
+  "Hoom hom! Splendid!",
+  "Even Quickbeam would be pleased!",
+  "The trees are singing!",
+  "Don't be hasty... but yes!",
+  "Burarum! Onward we march!",
+  "Treebeard nods slowly...",
+];
+
+const wrongPhrases = [
+  "Hoom... not quite, little one.",
+  "The forest whispers: try again.",
+  "Don't be hasty — think it over!",
+  "Burarum... that's not it.",
+  "Even Ents make mistakes. Try once more!",
+];
+
+const TOTAL_TO_WIN = 10;
+let score = 0;
+let streak = 0;
+let currentRound = null;
+let usedIndices = [];
+let locked = false;
+
+// ── FIREFLIES ──
+function createFireflies() {
+  const container = document.getElementById('fireflies');
+  for (let i = 0; i < 18; i++) {
+    const f = document.createElement('div');
+    f.className = 'firefly';
+    f.style.left = Math.random() * 100 + '%';
+    f.style.top = (10 + Math.random() * 70) + '%';
+    f.style.animationDelay = (Math.random() * 8) + 's';
+    f.style.animationDuration = (5 + Math.random() * 6) + 's';
+    container.appendChild(f);
+  }
+}
+
+// ── SHUFFLE ──
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── PICK ROUND ──
+function pickRound() {
+  if (usedIndices.length >= wordBank.length) usedIndices = [];
+  let idx;
+  do { idx = Math.floor(Math.random() * wordBank.length); }
+  while (usedIndices.includes(idx));
+  usedIndices.push(idx);
+  return wordBank[idx];
+}
+
+// ── SHOW ROUND ──
+function showRound() {
+  locked = false;
+  currentRound = pickRound();
+  const wordEl = document.getElementById('word');
+  wordEl.textContent = currentRound.word;
+  wordEl.style.animation = 'none';
+  void wordEl.offsetWidth;
+  wordEl.style.animation = 'wordAppear 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  const shuffled = shuffle(currentRound.pool);
+
+  shuffled.forEach((emoji, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = emoji;
+    btn.style.animationDelay = (i * 0.08) + 's';
+    btn.addEventListener('click', () => handleChoice(btn, emoji));
+    choicesEl.appendChild(btn);
+  });
+}
+
+// ── HANDLE CHOICE ──
+function handleChoice(btn, emoji) {
+  if (locked) return;
+  locked = true;
+
+  if (emoji === currentRound.correct) {
+    btn.classList.add('correct');
+    score++;
+    streak++;
+    document.getElementById('score').textContent = score;
+    document.getElementById('streak').textContent = streak;
+    showSpeech(entPhrases[Math.floor(Math.random() * entPhrases.length)]);
+    updateMarch();
+
+    if (score >= TOTAL_TO_WIN) {
+      setTimeout(showVictory, 900);
+    } else {
+      setTimeout(showRound, 1000);
+    }
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    document.getElementById('streak').textContent = streak;
+    showSpeech(wrongPhrases[Math.floor(Math.random() * wrongPhrases.length)]);
+    setTimeout(() => { locked = false; btn.classList.remove('wrong'); }, 600);
+  }
+}
+
+// ── MARCH ──
+function updateMarch() {
+  const pct = Math.min(score / TOTAL_TO_WIN, 1);
+  document.getElementById('pathFill').style.width = (pct * 100) + '%';
+
+  const entWalker = document.getElementById('entWalker');
+  const leftPx = 40 + pct * (window.innerWidth - 120);
+  entWalker.style.left = leftPx + 'px';
+
+  // Show followers at milestones
+  const followers = [
+    { el: document.getElementById('follower1'), threshold: 3, offset: -32 },
+    { el: document.getElementById('follower2'), threshold: 5, offset: -56 },
+    { el: document.getElementById('follower3'), threshold: 7, offset: -78 },
+  ];
+  followers.forEach(f => {
+    if (score >= f.threshold) {
+      f.el.classList.add('visible');
+      f.el.style.left = (leftPx + f.offset) + 'px';
+    }
+  });
+}
+
+// ── SPEECH BUBBLE ──
+let speechTimeout;
+function showSpeech(text) {
+  const el = document.getElementById('speech');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(speechTimeout);
+  speechTimeout = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ── VICTORY ──
+function showVictory() {
+  document.getElementById('finalScore').textContent =
+    `You matched ${score} words! The dam is broken!`;
+  document.getElementById('victoryScreen').classList.add('show');
+}
+
+// ── START / RESTART ──
+function startGame() {
+  document.getElementById('startScreen').classList.add('hide');
+  showRound();
+}
+
+function restartGame() {
+  score = 0; streak = 0; usedIndices = [];
+  document.getElementById('score').textContent = '0';
+  document.getElementById('streak').textContent = '0';
+  document.getElementById('pathFill').style.width = '0%';
+  document.getElementById('entWalker').style.left = '40px';
+  ['follower1','follower2','follower3'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('visible');
+    el.style.left = '40px';
+  });
+  document.getElementById('victoryScreen').classList.remove('show');
+  showRound();
+}
+
+// ── INIT ──
+createFireflies();
+
+// Position ent walker at start
+document.getElementById('entWalker').style.left = '40px';
+['follower1','follower2','follower3'].forEach(id => {
+  document.getElementById(id).style.left = '40px';
+});
+
+// Handle resize
+window.addEventListener('resize', updateMarch);
+</script>
+</body>
+</html>
