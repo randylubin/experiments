@@ -118,7 +118,7 @@
   }
 
   .fangorn-label, .isengard-label {
-    position: absolute; bottom: 28px;
+    position: absolute; bottom: 2px;
     font-size: 11px; color: var(--moss);
     letter-spacing: 1px; text-transform: uppercase;
     opacity: 0.7;
@@ -604,6 +604,7 @@ function pickRound() {
 // ── SHOW ROUND ──
 function showRound() {
   locked = false;
+  if (document.activeElement) document.activeElement.blur();
   currentRound = pickRound();
   const wordEl = document.getElementById('word');
   wordEl.textContent = currentRound.word;
