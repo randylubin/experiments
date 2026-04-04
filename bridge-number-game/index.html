@@ -580,6 +580,7 @@ setInterval(spawnEmber, 650);
 /* ─── NEW PROBLEM ─── */
 function newProblem() {
   answerable = true;
+  if (document.activeElement) document.activeElement.blur();
   document.getElementById('msg').textContent='';
   document.getElementById('msg').className='msg';
   document.getElementById('qmark').style.display='';
