@@ -245,11 +245,13 @@
     backdrop-filter: blur(4px);
     animation: choiceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
   }
-  .choice-btn:hover {
-    transform: scale(1.12);
-    border-color: var(--gold);
-    background: rgba(107,143,60,0.25);
-    box-shadow: 0 0 20px rgba(212,168,67,0.2);
+  @media (hover: hover) {
+    .choice-btn:hover {
+      transform: scale(1.12);
+      border-color: var(--gold);
+      background: rgba(107,143,60,0.25);
+      box-shadow: 0 0 20px rgba(212,168,67,0.2);
+    }
   }
   .choice-btn:active { transform: scale(0.95); }
   @keyframes choiceIn {
